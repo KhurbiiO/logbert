@@ -68,13 +68,13 @@ def preprocess(in_csv, out_csv, miner_config, miner_state):
 
     df.to_csv(os.path.join(out_csv), index=False)
 
-def process(in_csv, outdir, seq_len=20, train_ratio=0.4):
+def process(in_csv, outdir, seq_len=20, step_size=1, train_ratio=0.4):
     """
     Sliding windows for sequence generation
 
     """
     df = pd.read_csv(in_csv)
-    df = sliding_window(df, para={"window_size": seq_len, "step_size": 1})
+    df = sliding_window(df, para={"window_size": seq_len, "step_size": step_size})
 
     # events = df["EventId"].tolist()
 
