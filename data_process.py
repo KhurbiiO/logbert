@@ -61,6 +61,9 @@ def preprocess(in_csv, out_csv, miner_config, miner_state):
     df["EventId"] = df.apply(lambda row: inference(row._value, tm), axis=1)
     df["datetime"] = pd.to_datetime(df['_time'])
     df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9
+    
+    df = df.sort_values(by=['timestamp']) # sort by timestamp
+
     df['deltaT'] = df['datetime'].diff() / np.timedelta64(1, 's')
     df['deltaT'].fillna(0)
 
@@ -69,10 +72,6 @@ def preprocess(in_csv, out_csv, miner_config, miner_state):
     df.to_csv(os.path.join(out_csv), index=False)
 
 def process(in_csv, outdir, seq_len=20, step_size=1, train_ratio=0.4):
-    """
-    Sliding windows for sequence generation
-
-    """
     df = pd.read_csv(in_csv)
     df = sliding_window(df, para={"window_size": seq_len, "step_size": step_size})
 
