@@ -5,6 +5,7 @@ output/*
 
 # Editors
 .vscode/
+.vs
 .idea/
 
 # Vagrant

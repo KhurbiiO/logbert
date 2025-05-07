@@ -1,4 +1,4 @@
-file="../output/hdfs"
+file="../output/custom"
 if [ -e $file ]
 then
   echo "$file exists"
@@ -6,7 +6,7 @@ else
   mkdir -p $file
 fi
 
-file="../output/hdfs/bert"
+file="../output/custom/bert"
 if [ -e $file ]
 then
   echo "$file exists"
