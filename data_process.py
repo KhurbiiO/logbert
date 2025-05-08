@@ -84,7 +84,7 @@ def process(in_csv, outdir, seq_len=20, step_size=1, train_ratio=0.4):
         window = events[i:i + seq_len]
         sequences.append((window, max(labels[i:i + seq_len]))) #sequence plus label
 
-    encoded_sequences = [[f"E{e}" for e in seq] for seq in sequences]
+    encoded_sequences = [[f"E{e}" for e in seq] for seq,_ in sequences]
     encoded_sequences = [" ".join(seq) for seq in encoded_sequences]
 
     normal_sequences = [encoded_sequences[i] for i in range(len(encoded_sequences)) if sequences[i][1] == 0] 
