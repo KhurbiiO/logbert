@@ -76,29 +76,6 @@ def sliding_window(raw_data, para):
 
 
 
-
-
-def fixed_window(df, features, index, label, window_size='T'):
-    """
-    :param df: structured data after parsing
-    features: datetime, eventid
-    label: 1 anomaly/alert, 0 not anomaly
-    :param window_size: offset datetime https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
-    :return:
-    """
-    df = df[features + [label]]
-    agg_dict = {label: 'max'}
-    for f in features:
-        agg_dict[f] = _custom_resampler
-
-    seq_df = df.set_index(index).resample(window_size).agg(agg_dict).reset_index()
-    return seq_df
-
-
-def _custom_resampler(array_like):
-    return list(array_like)
-
-
 def deeplog_file_generator(filename, df, features):
     with open(filename, 'w') as f:
         for _, row in df.iterrows():
