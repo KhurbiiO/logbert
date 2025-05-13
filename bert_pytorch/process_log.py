@@ -12,7 +12,7 @@ class Processor():
     def __init__(self, options):
       self.drain_config_path = options["drain_config"]
       self.drain_state_path = options["drain_state"]
-      
+
       self.output_dir = options["output_dir"]
       self.seq_len = options["seq_len"]
       self.train_ratio = options["train_ratio"]
@@ -28,7 +28,7 @@ class Processor():
 
     def inference(self, msg):
         ID = self.drain_miner.add_log_message(msg)["cluster_id"]
-        return ID
+        return f"E{ID}"
 
     def preprocess(self, path, labels=False):
         df = pd.read_csv(path)
@@ -61,8 +61,6 @@ class Processor():
 
         encoded_sequences = [seq for seq,_ in sequences]
         encoded_sequences = [" ".join(seq) for seq in encoded_sequences]
-
-        encoded_sequences = [f"{sequences[i][0]}:" for i in range(len(encoded_sequences))]
 
         normal_sequences = [encoded_sequences[i] for i in range(len(encoded_sequences)) if sequences[i][1] == 0] 
         abnormal_sequences = [encoded_sequences[i] for i in range(len(encoded_sequences)) if sequences[i][1] == 1]
