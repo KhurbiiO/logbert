@@ -225,6 +225,30 @@ class Predictor():
 
         # for hypersphere distance
         return total_results, output_cls
+    
+    def predicts(self, file):
+        model = torch.load(self.model_path)
+        model.to(self.device)
+        model.eval()
+        print('model_path: {}'.format(self.model_path))
+        
+        vocab = WordVocab.load_vocab(self.vocab_path)
+
+        scale = None
+        error_dict = None
+        if self.is_time:
+            with open(self.scale_path, "rb") as f:
+                scale = pickle.load(f)
+
+            with open(self.model_dir + "error_dict.pkl", 'rb') as f:
+                error_dict = pickle.load(f)
+
+        if self.hypersphere_loss:
+            center_dict = torch.load(self.model_dir + "best_center.pt")
+            self.center = center_dict["center"]
+            self.radius = center_dict["radius"]
+        
+        return self.helper(model, self.output_dir, file, vocab, scale, error_dict)
 
     def predict(self):
         model = torch.load(self.model_path)
