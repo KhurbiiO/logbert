@@ -39,7 +39,7 @@ class Processor():
         df["datetime"] = pd.to_datetime(df['_time'])
         df['timestamp'] = df["datetime"].values.astype(np.int64) // 10 ** 9
         
-        df = df.sort_values(by=['timestamp']) # sort by timestamp
+        df = df.sort_values(by=['datetime']) # sort by timestamp
 
         df['deltaT'] = df['datetime'].diff() / np.timedelta64(1, 's')
         df['deltaT'].fillna(0)
