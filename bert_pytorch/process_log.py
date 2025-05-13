@@ -10,8 +10,9 @@ from drain3.file_persistence import FilePersistence
 
 class Processor():
     def __init__(self, options):
-      self.drain_config = options["drain_config"]
-      self.drain_state = options["drain_state"]
+      self.drain_config_path = options["drain_config"]
+      self.drain_state_path = options["drain_state"]
+      
       self.output_dir = options["output_dir"]
       self.seq_len = options["seq_len"]
       self.train_ratio = options["train_ratio"]
@@ -19,9 +20,9 @@ class Processor():
       self.structured_csv = os.path.join(self.output_dir, "process_structured.csv")
 
       self.drain_config = TemplateMinerConfig()
-      self.drain_config.load(self.drain_config)
+      self.drain_config.load(self.drain_config_path)
 
-      self.drain_persistence = FilePersistence(self.drain_state)
+      self.drain_persistence = FilePersistence(self.drain_state_path)
 
       self.drain_miner = TemplateMiner(self.drain_persistence, self.drain_config) 
 
