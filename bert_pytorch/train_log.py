@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 import tqdm
 import gc
+import os
 
 class Trainer():
     def __init__(self, options):
@@ -92,9 +93,14 @@ class Trainer():
         del time_valid
         gc.collect()
 
-        print("Building BERT model")
-        bert = BERT(len(vocab), max_len=self.max_len, hidden=self.hidden, n_layers=self.layers, attn_heads=self.attn_heads,
-                    is_logkey=self.is_logkey, is_time=self.is_time)
+        if os.path.isfile(self.model_path):
+            print("Loading Pre-Trained BERT model")
+            model = torch.load(self.model_path)
+            bert = model.bert
+        else:
+            print("Building BERT model")
+            bert = BERT(len(vocab), max_len=self.max_len, hidden=self.hidden, n_layers=self.layers, attn_heads=self.attn_heads,
+                        is_logkey=self.is_logkey, is_time=self.is_time)
 
         print("Creating BERT Trainer")
         self.trainer = BERTTrainer(bert, len(vocab), train_dataloader=self.train_data_loader, valid_dataloader=self.valid_data_loader,
