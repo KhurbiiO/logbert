@@ -74,9 +74,6 @@ class Trainer():
                                     corpus_lines=self.corpus_lines, on_memory=self.on_memory, mask_ratio=self.mask_ratio)
 
         print("\nLoading valid Dataset")
-        # valid_dataset = generate_train_valid(self.output_path + "train", window_size=self.window_size,
-        #                              adaptive_window=self.adaptive_window,
-        #                              sample_ratio=self.valid_ratio)
 
         valid_dataset = LogDataset(logkey_valid, time_valid, vocab, seq_len=self.seq_len, on_memory=self.on_memory, mask_ratio=self.mask_ratio)
 
@@ -117,9 +114,6 @@ class Trainer():
         print("Training Start")
         best_loss = float('inf')
         epochs_no_improve = 0
-        # best_center = None
-        # best_radius = 0
-        # total_dist = None
         for epoch in range(self.epochs):
             print("\n")
             if self.hypersphere_loss:
@@ -165,8 +159,6 @@ class Trainer():
 
     def calculate_center(self, data_loader_list):
         print("start calculate center")
-        # model = torch.load(self.model_path)
-        # model.to(self.device)
         with torch.no_grad():
             outputs = 0
             total_samples = 0
@@ -196,8 +188,3 @@ class Trainer():
         plt.savefig(self.model_dir + "train_valid_loss.png")
         plt.show()
         print("plot done")
-
-
-
-
-

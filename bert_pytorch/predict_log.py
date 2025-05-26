@@ -107,13 +107,6 @@ class Predictor():
                 if len(log_seq) == 0:
                     continue
 
-                # if scale is not None:
-                #     times = tim_seq
-                #     for i, tn in enumerate(times):
-                #         tn = np.array(tn).reshape(-1, 1)
-                #         times[i] = scale.transform(tn).reshape(-1).tolist()
-                #     tim_seq = times
-
                 log_seqs += log_seq
                 tim_seqs += tim_seq
 
@@ -158,17 +151,8 @@ class Predictor():
 
             result = model(data["bert_input"], data["time_input"])
 
-            # mask_lm_output, mask_tm_output: batch_size x session_size x vocab_size
-            # cls_output: batch_size x hidden_size
-            # bert_label, time_label: batch_size x session_size
-            # in session, some logkeys are masked
-
             mask_lm_output, mask_tm_output = result["logkey_output"], result["time_output"]
             output_cls += result["cls_output"].tolist()
-
-            # dist = torch.sum((result["cls_output"] - self.hyper_center) ** 2, dim=1)
-            # when visualization no mask
-            # continue
 
             # loop though each session in batch
             for i in range(len(data["bert_label"])):
@@ -217,14 +201,74 @@ class Predictor():
                     )
                 total_results.append(seq_results)
 
-        # for time
-        # return total_results, total_errors
-
-        #for logkey
-        # return total_results, output_results
-
-        # for hypersphere distance
         return total_results, output_cls
+    
+    def predict_single_sequence(self, log_seq, time_seq=None):
+        model = torch.load(self.model_path)
+        model.to(self.device)
+        model.eval()
+
+        vocab = WordVocab.load_vocab(self.vocab_path)
+
+        # Scale time if necessary
+        if self.is_time and time_seq is not None:
+            with open(self.scale_path, "rb") as f:
+                scale = pickle.load(f)
+            time_seq = np.array(time_seq).reshape(-1, 1)
+            time_seq = scale.transform(time_seq).reshape(-1).tolist()
+        
+        if self.hypersphere_loss:
+            center_dict = torch.load(self.model_dir + "best_center.pt")
+            self.center = center_dict["center"]
+            self.radius = center_dict["radius"]
+
+        # # Prepare sequence
+        # log_seq = torch.tensor([log_seq], dtype=torch.long)
+        # time_seq = torch.tensor([time_seq], dtype=torch.float) if self.is_time and time_seq is not None else torch.zeros_like(log_seq, dtype=torch.float)
+
+        
+        log_seq = [log_seq]
+        if self.is_time and time_seq is not None:
+            time_seq = [time_seq]
+        else:
+            time_seq = [[0.0] * len(log_seq[0])]
+
+        seq_dataset = LogDataset(
+            log_seq, time_seq, vocab,
+            seq_len=self.seq_len, corpus_lines=1,
+            on_memory=True, predict_mode=True,
+            mask_ratio=self.mask_ratio
+        )
+
+        data_loader = DataLoader(seq_dataset, batch_size=1, num_workers=0,
+                                collate_fn=seq_dataset.collate_fn)
+
+        for data in data_loader:
+            data = {key: value.to(self.device) for key, value in data.items()}
+            result = model(data["bert_input"], data["time_input"])
+
+            mask_lm_output = result["logkey_output"]
+            mask_index = data["bert_label"][0] > 0
+
+            num_undetected, output_seq = self.detect_logkey_anomaly(
+                mask_lm_output[0][mask_index],
+                data["bert_label"][0][mask_index]
+            )
+
+            output = {
+                "undetected_tokens": num_undetected,
+                "masked_tokens": torch.sum(mask_index).item(),
+                "anomaly": num_undetected > self.mask_ratio * self.seq_len,
+                "predictions": output_seq[0],  # top predicted tokens
+                "true_labels": output_seq[1]
+            }
+
+            if self.hypersphere_loss:
+                dist = torch.sqrt(torch.sum((result["cls_output"][0] - self.center) ** 2))
+                output["hypersphere_dist"] = dist.item()
+                output["deepSVDD_label"] = int(dist.item() > self.radius)
+
+            return output
     
     def predicts(self, file):
         model = torch.load(self.model_path)

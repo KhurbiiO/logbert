@@ -48,6 +48,13 @@ class Processor():
 
         df.to_csv(self.structured_csv, index=False)
 
+    def log_messages_to_keys(self, log_messages):
+        log_keys = []
+        for msg in log_messages:
+            cluster_id = self.drain_miner.add_log_message(msg)["cluster_id"]
+            log_keys.append(f"E{cluster_id}")
+        return log_keys
+
     def process(self, shuffle_seq=True):
         df = pd.read_csv(self.structured_csv )
 
