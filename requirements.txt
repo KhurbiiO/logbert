@@ -1,11 +1,23 @@
-ipykernel==6.9.1
-pandas==1.4.1
-matplotlib==3.5.1
-numpy==1.22.3
+# ipykernel==6.9.1
+# pandas==1.4.1
+# matplotlib==3.5.1
+# numpy==1.22.3
+# regex==2022.3.2
+# requests==2.27.1
+# seaborn==0.11.2
+# scikit-learn==1.1.0
+# torch==2.5.0
+# tqdm==4.63.0
+# drain3
+
+ipykernel==6.29.5
+pandas==2.2.3
+matplotlib==3.10.3
+numpy==2.2.6
 regex==2022.3.2
-requests==2.27.1
-seaborn==0.11.2
-scikit-learn==1.1.0
+requests==2.32.3
+seaborn==0.13.2
+scikit-learn==1.6.1
 torch==2.5.0
-tqdm==4.63.0
-drain3
+tqdm==4.67.1
+drain3==0.9.11
